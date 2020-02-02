@@ -1,4 +1,21 @@
 console.log('1.js-connected');
+
+//////////////// FIREBASE //////////////
+// Your web app's Firebase configuration
+let firebaseConfig = {
+	apiKey: "AIzaSyBEjTnvCCkM4bRr73PJrCbC3HQ46p6cK5I",
+    authDomain: "lzrbit-db.firebaseapp.com",
+    databaseURL: "https://lzrbit-db.firebaseio.com",
+    projectId: "lzrbit-db",
+    storageBucket: "lzrbit-db.appspot.com",
+    messagingSenderId: "488933348339",
+    appId: "1:488933348339:web:eb448d3c1c2d26b3973886",
+    measurementId: "G-TBC5QYT0H4"
+};
+  // Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+//////////////// FIREBASE //////////////
+
 //////////////// CONTROL PARAMS ///////////
 let PARAMS = {
 	x: 0,
@@ -61,7 +78,7 @@ paneAcc
 		title: 'Save Galaxy'
 	})
 	.on('click', () => {
-		console.log('click detected');
+		// download the galaxy to your desktop
 		saveDrawing();
 	});
 //////////////// TWEAKPANE ////////////////
@@ -144,15 +161,65 @@ resizeCanvas();
 
 // save drawing
 function saveDrawing() {
-	console.log('saveDrawing');
-	// let finalCanvas = document.querySelector('#canvas');
+	////////////// DOWNLOAD IMAGE //////////////
+	console.log('downloading Galaxy');
 	const a = document.createElement('a');
 	document.body.appendChild(a);
 	a.href = canvas.toDataURL('image/png', 1);
 	a.download = 'canvas-image.png';
 	a.click();
 	document.body.removeChild(a);
+
+	////////////// FIREBASE UPLOAD IMAGE //////////////
+	// image BLOB
+	let imgData = dataURLtoBlob(a.href);
+	// Image NAME + Unique ID number
+	let imgName = `galaxy:${uuidv4()}`;
+	// Upload image to FIREBASE
+	let storageRef = firebase.storage().ref(`images/${imgName}`);
+	// Upload image to selected storage reference
+	let uploadTask = storageRef.put(imgData);
+	uploadTask.on('state_changed', (snapshot)=> {
+		// observe state chenge events such as progress, pause, resume
+		// get task progress by including the number of bytes uploaded and total number of bytes
+		let progress = (snapshot.bytesTransferred/snapshot.totalBytes)*100;
+		console.log(`upload progress: ${progress} done`);
+	}, function(error){
+		console.log(error.message);
+	}, function(){
+		// handle successful uploads on complete
+		uploadTask.snapshot.ref.getDownloadURL().then( (downloadURL)=> {
+			// get your upload image URL here..p5.BandPass()
+			console.log(downloadURL);
+		})
+	})
 }
+
+//**dataURL to blob */
+function dataURLtoBlob(dataurl) {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type:mime});
+}
+
+//**blob to dataURL**
+function blobToDataURL(blob, callback) {
+    var a = new FileReader();
+    a.onload = function(e) {callback(e.target.result);}
+    a.readAsDataURL(blob);
+}
+
+// Unique Id for Firebase Storage
+function uuidv4() {
+	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+	  var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+	  return v.toString(16);
+	});
+  }
+
 //////////////// CANVAS ///////////////////
 
 //////////////// SLIDE-PANEL //////////////
@@ -170,3 +237,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	});
 });
 //////////////// SLIDE-PANEL //////////////
+
+
+
