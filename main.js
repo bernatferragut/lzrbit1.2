@@ -14,6 +14,7 @@ let firebaseConfig = {
 };
   // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
+let firestore = firebase.firestore();
 //////////////// FIREBASE //////////////
 
 //////////////// CONTROL PARAMS ///////////
