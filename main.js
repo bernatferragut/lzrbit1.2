@@ -42,9 +42,15 @@ paneDot.addInput(PARAMS, 'dotWidth', {
 	label: 'DOT WIDTH'
 });
 paneDot.addInput(PARAMS, 'dotColor', { label: 'DOT COLOR' });
-// panelDot - CHANGES
+// panelDot - CHANGES : PAINT!
 paneDot.on('change', (value) => {
 	console.log('dot: ', value);
+	// LET'S PAINT DOTS
+	// if(PARAMS.dot===true) {
+	// 	mx = brush.mapValues(PARAMS.x, -1024, 1024, 0, w);
+	// 	my = brush.mapValues(PARAMS.y, -1024, 1024, 0, h);
+	// 	brush.drawDot(mx, my, PARAMS.dotWidth, PARAMS.dotColor);
+	// }
 });
 
 // TWEAKPANE - INPUT - LINE
@@ -62,6 +68,12 @@ paneLine.addInput(PARAMS, 'lineColor', { label: 'LINE COLOR' });
 // panelLine - CHANGES
 paneLine.on('change', (value) => {
 	console.log('line: ', value);
+	// LET'S PAINT LINES
+	// if(PARAMS.line===true) {
+	// 	mx = brush.mapValues(PARAMS.x, -1024, 1024, 0, w);
+	// 	my = brush.mapValues(PARAMS.y, -1024, 1024, 0, h);
+	// 	brush.drawLine(mx, my, PARAMS.lineWidth, PARAMS.lineColor);
+	// }
 });
 
 // TWEAKPANE - MONITOR - ACCELEROMETER
@@ -117,20 +129,31 @@ function microbitPairing() {
 //////////////// MICROBIT PAIRING /////////
 
 //////////////// CANVAS ///////////////////
-const canvas = document.querySelector('#canvas');
-const ctx = canvas.getContext('2d');
-let w = (canvas.width = window.innerWidth);
-let h = (canvas.height = window.innerHeight);
-let brush = new Brush(ctx);
+// CTX-1-BACKGROUND
+const canvas1 = document.querySelector('#layer-1');
+const ctx1 = canvas1.getContext('2d');
+// CTX-2-POINTER
+const canvas2 = document.querySelector('#layer-2');
+const ctx2 = canvas2.getContext('2d');
+// SIZING CANVASES
+let w = (canvas1.width = window.innerWidth);
+let h = (canvas1.height = window.innerHeight);
+// CREATING BRUSH AND POINTER
+let brush = new Brush(ctx1,ctx2);
 let frame, mx, my;
+let pointer = new Brush(ctx1,ctx2);
 
-// Animation
+// Animation will be done on the TOP layer ( 2 Canvas )
 (function loop() {
 	// LZR add composite filter
-	ctx.globalCompositeOperation = 'lighter';
-	console.log;
+	ctx1.globalCompositeOperation = 'lighter';
 	// Drawing
 	if (isPaired) {
+		// Drawing Axis in ctx2
+		mx = brush.mapValues(PARAMS.x, -1024, 1024, 0, w);
+		my = brush.mapValues(PARAMS.y, -1024, 1024, 0, h);
+		brush.drawAxis(mx, my, w, h);
+		// Drawing dots and lines in ctx1
 		if (PARAMS.dot === true) {
 			// Drawing Dot
 			mx = brush.mapValues(PARAMS.x, -1024, 1024, 0, w);
@@ -138,24 +161,16 @@ let frame, mx, my;
 			brush.drawDot(mx, my, PARAMS.dotWidth, PARAMS.dotColor);
 
 			// dot drawing
-		} else if (PARAMS.line === true) {
+		}
+		if (PARAMS.line === true) {
 			// Drawing Line
 			mx = brush.mapValues(PARAMS.x, -1024, 1024, 0, w);
 			my = brush.mapValues(PARAMS.y, -1024, 1024, 0, h);
 			brush.drawLine(mx, my, PARAMS.lineWidth, PARAMS.lineColor);
 			// allows to start path from here without jumping
 			// ctx.beginPath();
-		} else {
-			// nothing drawing
-			ctx.clearRect(0, 0, w, h);
-			// Drawing Axist
-			mx = brush.mapValues(PARAMS.x, -1024, 1024, 0, w);
-			my = brush.mapValues(PARAMS.y, -1024, 1024, 0, h);
-			// Draw axis
-			brush.drawAxis(mx, my, w, h);
-		}
+		} 
 	}
-
 	// Loop
 	frame = requestAnimationFrame(loop);
 })();
@@ -163,8 +178,10 @@ let frame, mx, my;
 // resize canvas
 window.addEventListener('resize', resizeCanvas);
 function resizeCanvas() {
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
+	canvas1.width = window.innerWidth;
+	canvas1.height = window.innerHeight;
+	canvas2.width = window.innerWidth;
+	canvas2.height = window.innerHeight;
 }
 resizeCanvas();
 
@@ -174,7 +191,7 @@ function saveDrawing() {
 	console.log('downloading Galaxy');
 	const a = document.createElement('a');
 	document.body.appendChild(a);
-	a.href = canvas.toDataURL('image/png', 1);
+	a.href = canvas1.toDataURL('image/png', 1);
 	a.download = 'canvas-image.png';
 	a.click();
 	document.body.removeChild(a);
