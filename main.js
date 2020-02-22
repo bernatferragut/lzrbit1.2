@@ -153,12 +153,8 @@ let h = (canvas1.height = window.innerHeight);
 let brush = new Brush(ctx1,ctx2);
 let frame, mx, my;
 let pointer = new Brush(ctx1,ctx2);
+////////////// DOWNLOAD IMAGE PREP.//////////////
 
-// SAVING AN IMAGE TO AVOID WEIRD BUG LATER IN MAIN SAVE ***
-let a = document.createElement('a');
-document.body.appendChild(a);
-a.href = canvas1.toDataURL('image/png');
-a.download = 'canvas-image.png';
 
 // Animation will be done on the TOP layer ( 2 Canvas )
 (function loop() {
@@ -212,11 +208,11 @@ function saveDrawing() {
 	////////////// DOWNLOAD IMAGE //////////////
 	console.log('downloading Galaxy');
 	let a = document.createElement('a');
-	document.body.appendChild(a);
-	a.href = canvas1.toDataURL('image/png', 1);
+	// document.body.appendChild(a);
+	a.href = canvas1.toDataURL('image/png');
 	a.download = 'canvas-image.png';
 	a.click();
-	document.body.removeChild(a);
+	// document.body.removeChild(a);
 	////////////// FIREBASE UPLOAD IMAGE //////////////
 	// image BLOB
 	let imgData = dataURLtoBlob(a.href);
@@ -288,6 +284,3 @@ document.addEventListener('DOMContentLoaded', function() {
 	});
 });
 //////////////// SLIDE-PANEL //////////////
-
-
-
